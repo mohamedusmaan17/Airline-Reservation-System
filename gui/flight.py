@@ -406,9 +406,12 @@ class FlightWindow:
          conn = connect_db()
          cursor = conn.cursor()
 
+         is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+         p = "?" if is_sqlite else "%s"
+
             # Get Airline ID
          cursor.execute(
-            "SELECT airline_id FROM airlines WHERE airline_name=%s",
+            f"SELECT airline_id FROM airlines WHERE airline_name={p}",
             (self.airline.get(),)
          )
          row = cursor.fetchone()
@@ -425,7 +428,7 @@ class FlightWindow:
 
             # Get Source Airport ID
          cursor.execute(
-              "SELECT airport_id FROM airports WHERE airport_name=%s",
+              f"SELECT airport_id FROM airports WHERE airport_name={p}",
               (self.source.get(),)
             )
          row = cursor.fetchone()
@@ -441,7 +444,7 @@ class FlightWindow:
          source_id = row[0]
             # Get Destination Airport ID
          cursor.execute(
-              "SELECT airport_id FROM airports WHERE airport_name=%s",
+              f"SELECT airport_id FROM airports WHERE airport_name={p}",
                (self.destination.get(),)
             )
          row = cursor.fetchone()
@@ -468,7 +471,7 @@ class FlightWindow:
                 conn.close()
                 return
          cursor.execute(
-                "SELECT * FROM flights WHERE flight_number=%s",
+                f"SELECT * FROM flights WHERE flight_number={p}",
                 (flight_no,)
             )
 
@@ -577,9 +580,7 @@ class FlightWindow:
             conn.close()
             return
 
-
-
-         sql = """
+         sql = f"""
            INSERT INTO flights
             (
             airline_id,
@@ -598,7 +599,7 @@ class FlightWindow:
             )
 
             VALUES
-            (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            ({p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p},{p})
             """
 
          cursor.execute(sql,(
@@ -673,45 +674,47 @@ class FlightWindow:
         conn = connect_db()
         cursor = conn.cursor()
 
+        is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+        p = "?" if is_sqlite else "%s"
+
         # Airline ID
         cursor.execute(
-            "SELECT airline_id FROM airlines WHERE airline_name=%s",
+            f"SELECT airline_id FROM airlines WHERE airline_name={p}",
             (self.airline.get(),)
         )
         airline_id = cursor.fetchone()[0]
 
         # Source Airport ID
         cursor.execute(
-            "SELECT airport_id FROM airports WHERE airport_name=%s",
+            f"SELECT airport_id FROM airports WHERE airport_name={p}",
             (self.source.get(),)
         )
         source_id = cursor.fetchone()[0]
 
         # Destination Airport ID
         cursor.execute(
-            "SELECT airport_id FROM airports WHERE airport_name=%s",
+            f"SELECT airport_id FROM airports WHERE airport_name={p}",
             (self.destination.get(),)
         )
         destination_id = cursor.fetchone()[0]
 
-
-        cursor.execute("""
+        cursor.execute(f"""
             UPDATE flights
             SET
-                airline_id=%s,
-                source_airport=%s,
-                destination_airport=%s,
-                flight_number=%s,
-                departure_time=%s,
-                arrival_time=%s,
-                boarding_time=%s,
-                flight_status=%s,
-                gate_no=%s,
-                terminal_no=%s,
-                total_seats=%s,
-                available_seats=%s,
-                ticket_price=%s
-            WHERE flight_id=%s
+                airline_id={p},
+                source_airport={p},
+                destination_airport={p},
+                flight_number={p},
+                departure_time={p},
+                arrival_time={p},
+                boarding_time={p},
+                flight_status={p},
+                gate_no={p},
+                terminal_no={p},
+                total_seats={p},
+                available_seats={p},
+                ticket_price={p}
+            WHERE flight_id={p}
         """,(
             airline_id,
             source_id,
@@ -763,8 +766,11 @@ class FlightWindow:
         conn = connect_db()
         cursor = conn.cursor()
 
+        is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+        p = "?" if is_sqlite else "%s"
+
         cursor.execute(
-            "DELETE FROM flights WHERE flight_id=%s",
+            f"DELETE FROM flights WHERE flight_id={p}",
             (self.flight_id,)
         )
 
@@ -832,9 +838,13 @@ class FlightWindow:
         conn = connect_db()
         cursor = conn.cursor()
 
+        is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+        p = "?" if is_sqlite else "%s"
+        cast_type = "TEXT" if is_sqlite else "CHAR"
+
         search = "%" + keyword + "%"
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT
                 f.flight_id,
                 a.airline_name,
@@ -857,11 +867,11 @@ class FlightWindow:
             JOIN airports ap2
                 ON f.destination_airport = ap2.airport_id
             WHERE
-                LOWER(a.airline_name) LIKE LOWER(%s)
-                OR LOWER(ap1.airport_name) LIKE LOWER(%s)
-                OR LOWER(ap2.airport_name) LIKE LOWER(%s)
-                OR LOWER(f.flight_number) LIKE LOWER(%s)
-                OR CAST(f.flight_id AS CHAR) LIKE %s
+                LOWER(a.airline_name) LIKE LOWER({p})
+                OR LOWER(ap1.airport_name) LIKE LOWER({p})
+                OR LOWER(ap2.airport_name) LIKE LOWER({p})
+                OR LOWER(f.flight_number) LIKE LOWER({p})
+                OR CAST(f.flight_id AS {cast_type}) LIKE {p}
             ORDER BY f.flight_id
         """, (
             search,
