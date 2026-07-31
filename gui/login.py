@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+
 from database.db import connect_db
 
 
@@ -88,10 +89,11 @@ class LoginWindow:
           "Success",
           "Login Successful!"
         )
- 
+
          self.root.destroy()
 
          import tkinter as tk
+
          from gui.dashboard import Dashboard
 
          dashboard_window = tk.Tk()

@@ -1,11 +1,10 @@
-from ast import keyword
+import re
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-
-from regex import search
+from datetime import datetime
+from tkinter import messagebox, ttk
 
 from database.db import connect_db
+
 
 class FlightWindow:
 
@@ -29,54 +28,96 @@ class FlightWindow:
         title.pack(fill="x")
 
         form = tk.Frame(root, bg="white")
-        form.pack(pady=20)
+        form.pack(pady=10)
 
         self.airline = ttk.Combobox(form, width=30, state="readonly")
         self.source = ttk.Combobox(form, width=30, state="readonly")
         self.destination = ttk.Combobox(form, width=30, state="readonly")
         self.flight_no = tk.Entry(form,width=35)
 
-        self.departure = tk.Entry(form,width=35)
+        # NEW
+        self.boarding_time = tk.Entry(form, width=35)
 
-        self.arrival = tk.Entry(form,width=35)
+        self.departure_time = tk.Entry(form, width=35)
 
-        self.total_seats = tk.Entry(form,width=35)
+        self.arrival_time = tk.Entry(form, width=35)
 
-        self.ticket_price = tk.Entry(form,width=35)
+        self.total_seats = tk.Entry(form, width=35)
 
-        tk.Label(form, text="Airline", font=("Arial",12), bg="white").grid(row=0, column=0, padx=10, pady=10)
-        self.airline.grid(row=0, column=1)
+        self.ticket_price = tk.Entry(form, width=35)
 
-        tk.Label(form, text="Source Airport", font=("Arial",12), bg="white").grid(row=1, column=0, padx=10, pady=10)
-        self.source.grid(row=1, column=1)
+        self.flight_status = ttk.Combobox(
+            form,
+            width=32,
+            values=[
+                "Scheduled",
+                "Boarding",
+                "Delayed",
+                "Cancelled",
+                "Departed",
+                "Arrived"
+            ],
+            state="readonly"
+        )
 
-        tk.Label(form, text="Destination Airport", font=("Arial",12), bg="white").grid(row=2, column=0, padx=10, pady=10)
-        self.destination.grid(row=2, column=1)
+        self.gate_no = tk.Entry(form, width=35)
 
-        tk.Label(form, text="Flight Number", font=("Arial",12), bg="white").grid(row=3, column=0, padx=10, pady=10)
-        self.flight_no.grid(row=3, column=1)
+        self.terminal_no = tk.Entry(form, width=35)
 
-        tk.Label(form, text="Departure", font=("Arial",12), bg="white").grid(row=4, column=0, padx=10, pady=10)
-        self.departure.grid(row=4, column=1)
+       # ===========================
+# LEFT COLUMN
+# ===========================
 
-        tk.Label(form, text="Arrival", font=("Arial",12), bg="white").grid(row=5, column=0, padx=10, pady=10)
-        self.arrival.grid(row=5, column=1)
+        tk.Label(form, text="Airline", bg="white", font=("Arial",12)).grid(row=0,column=0,padx=10,pady=8,sticky="w")
+        self.airline.grid(row=0,column=1,padx=10)
 
-        tk.Label(form, text="Total Seats", font=("Arial",12), bg="white").grid(row=6, column=0, padx=10, pady=10)
-        self.total_seats.grid(row=6, column=1)
+        tk.Label(form, text="Source Airport", bg="white", font=("Arial",12)).grid(row=1,column=0,padx=10,pady=8,sticky="w")
+        self.source.grid(row=1,column=1,padx=10)
 
-        tk.Label(form, text="Ticket Price", font=("Arial",12), bg="white").grid(row=7, column=0, padx=10, pady=10)
-        self.ticket_price.grid(row=7, column=1)
+        tk.Label(form, text="Destination Airport", bg="white", font=("Arial",12)).grid(row=2,column=0,padx=10,pady=8,sticky="w")
+        self.destination.grid(row=2,column=1,padx=10)
+
+        tk.Label(form, text="Flight Number", bg="white", font=("Arial",12)).grid(row=3,column=0,padx=10,pady=8,sticky="w")
+        self.flight_no.grid(row=3,column=1,padx=10)
+
+        tk.Label(form, text="Departure Time", bg="white", font=("Arial",12)).grid(row=4,column=0,padx=10,pady=8,sticky="w")
+        self.departure_time.grid(row=4,column=1,padx=10)
+
+        tk.Label(form, text="Arrival Time", bg="white", font=("Arial",12)).grid(row=5,column=0,padx=10,pady=8,sticky="w")
+        self.arrival_time.grid(row=5,column=1,padx=10)
+
+        # ===========================
+        # RIGHT COLUMN
+        # ===========================
+
+        tk.Label(form, text="Boarding Time", bg="white", font=("Arial",12)).grid(row=0,column=2,padx=40,pady=8,sticky="w")
+        self.boarding_time.grid(row=0,column=3,padx=10)
+
+        tk.Label(form, text="Flight Status", bg="white", font=("Arial",12)).grid(row=1,column=2,padx=40,pady=8,sticky="w")
+        self.flight_status.grid(row=1,column=3,padx=10)
+
+        tk.Label(form, text="Gate No", bg="white", font=("Arial",12)).grid(row=2,column=2,padx=40,pady=8,sticky="w")
+        self.gate_no.grid(row=2,column=3,padx=10)
+
+        tk.Label(form, text="Terminal No", bg="white", font=("Arial",12)).grid(row=3,column=2,padx=40,pady=8,sticky="w")
+        self.terminal_no.grid(row=3,column=3,padx=10)
+
+        tk.Label(form, text="Total Seats", bg="white", font=("Arial",12)).grid(row=4,column=2,padx=40,pady=8,sticky="w")
+        self.total_seats.grid(row=4,column=3,padx=10)
+
+        tk.Label(form, text="Ticket Price", bg="white", font=("Arial",12)).grid(row=5,column=2,padx=40,pady=8,sticky="w")
+        self.ticket_price.grid(row=5,column=3,padx=10)
 
         self.load_airlines()
         self.load_airports()
+        self.flight_status.current(0)      # Default = Scheduled
         # =====================
-        
+
          # Button Frame
         # ==========================
 
         button_frame = tk.Frame(root, bg="white")
-        button_frame.pack(pady=15)
+        button_frame.pack(pady=10)
 
         tk.Button(
             button_frame,
@@ -105,9 +146,9 @@ class FlightWindow:
             width=12,
             command=self.clear_fields
         ).grid(row=0, column=3, padx=10)
-    
+
         search_frame = tk.Frame(root, bg="white")
-        search_frame.pack(pady=5)
+        search_frame.pack(pady=8)
 
         tk.Label(
             search_frame,
@@ -143,8 +184,7 @@ class FlightWindow:
                 # ==========================
 
         table_frame = tk.Frame(self.root, bg="white")
-        table_frame.pack(pady=20)
-
+        table_frame.pack(fill="both", expand=True, padx=15, pady=10)
         scroll_x = tk.Scrollbar(table_frame, orient="horizontal")
         scroll_y = tk.Scrollbar(table_frame, orient="vertical")
 
@@ -158,9 +198,13 @@ class FlightWindow:
                 "flight_no",
                 "departure",
                 "arrival",
+                "boarding",
+                "status",
+                "gate",
+                "terminal",
                 "seats",
                 "price"
-            ),
+                ),
             xscrollcommand=scroll_x.set,
             yscrollcommand=scroll_y.set
         )
@@ -178,6 +222,10 @@ class FlightWindow:
         self.flight_table.heading("flight_no", text="Flight No")
         self.flight_table.heading("departure", text="Departure")
         self.flight_table.heading("arrival", text="Arrival")
+        self.flight_table.heading("boarding", text="Boarding")
+        self.flight_table.heading("status", text="Status")
+        self.flight_table.heading("gate", text="Gate")
+        self.flight_table.heading("terminal", text="Terminal")
         self.flight_table.heading("seats", text="Seats")
         self.flight_table.heading("price", text="Ticket Price")
 
@@ -190,6 +238,10 @@ class FlightWindow:
         self.flight_table.column("flight_no", width=100)
         self.flight_table.column("departure", width=150)
         self.flight_table.column("arrival", width=150)
+        self.flight_table.column("boarding", width=130)
+        self.flight_table.column("status", width=120)
+        self.flight_table.column("gate", width=80)
+        self.flight_table.column("terminal", width=90)
         self.flight_table.column("seats", width=80)
         self.flight_table.column("price", width=100)
 
@@ -239,10 +291,12 @@ class FlightWindow:
         contents = self.flight_table.item(cursor_row)
 
         row = contents["values"]
+        print(row)
+        print(len(row))
 
         if not row:
             return
-        
+
         self.flight_id = row[0]
 
         self.airline.set(row[1])
@@ -252,19 +306,32 @@ class FlightWindow:
         self.flight_no.delete(0, tk.END)
         self.flight_no.insert(0, row[4])
 
-        self.departure.delete(0, tk.END)
-        self.departure.insert(0, row[5])
+        self.departure_time.delete(0, tk.END)
+        self.departure_time.insert(0, row[5])
 
-        self.arrival.delete(0, tk.END)
-        self.arrival.insert(0, row[6])
+        self.arrival_time.delete(0, tk.END)
+        self.arrival_time.insert(0, row[6])
+
+        self.boarding_time.delete(0, tk.END)
+        self.boarding_time.insert(0, row[7])
+
+        self.flight_status.set(row[8])
+
+        self.gate_no.delete(0, tk.END)
+        self.gate_no.insert(0, row[9])
+
+        self.terminal_no.delete(0, tk.END)
+        self.terminal_no.insert(0, row[10])
 
         self.total_seats.delete(0, tk.END)
-        self.total_seats.insert(0, row[7])
+        self.total_seats.insert(0, row[11])
 
         self.ticket_price.delete(0, tk.END)
-        self.ticket_price.insert(0, row[8])
+        self.ticket_price.insert(0, row[12])
+
 
     def add_flight(self):
+
          if self.airline.get() == "":
             messagebox.showerror("Error","Select Airline")
             return
@@ -281,13 +348,45 @@ class FlightWindow:
             messagebox.showerror("Error","Enter Flight Number")
             return
 
-         if self.departure.get() == "":
-             messagebox.showerror("Error","Enter Departure Time")
-             return
+         if self.boarding_time.get() == "":
+                messagebox.showerror("Error","Enter Boarding Time")
+                return
+         if self.flight_status.get() == "":
+            messagebox.showerror("Error","Select Flight Status")
+            return
 
-         if self.arrival.get() == "":
-             messagebox.showerror("Error","Enter Arrival Time")
-             return
+         gate_no = self.gate_no.get().strip().upper()
+
+         if gate_no == "":
+                messagebox.showerror("Error", "Enter Gate Number")
+                return
+
+         if not re.match(r"^[A-Z]?[0-9]{1,3}$", gate_no):
+                messagebox.showerror(
+                    "Error",
+                    "Invalid Gate Number.\nExample: A1, B12, 15"
+                )
+                return
+
+         terminal_no = self.terminal_no.get().strip().upper()
+
+         if terminal_no == "":
+            messagebox.showerror("Error", "Enter Terminal Number")
+            return
+
+         if not re.match(r"^[A-Z0-9]{1,5}$", terminal_no):
+            messagebox.showerror(
+                "Error",
+                "Invalid Terminal.\nExample: T1, T2, A"
+            )
+            return
+         if self.departure_time.get() == "":
+            messagebox.showerror("Error","Enter Departure Time")
+            return
+
+         if self.arrival_time.get() == "":
+            messagebox.showerror("Error","Enter Arrival Time")
+            return
 
          if self.total_seats.get() == "":
              messagebox.showerror("Error","Enter Total Seats")
@@ -357,50 +456,186 @@ class FlightWindow:
 
          destination_id = row[0]
             # Get values from Entry widgets
-         flight_no = self.flight_no.get()
-         departure = self.departure.get()
-         arrival = self.arrival.get()
-         total_seats = self.total_seats.get()
-         ticket_price = self.ticket_price.get()
+         flight_no = self.flight_no.get().strip().upper()
+         # Flight Number Format
+         # Example: AI101, 6E2345, UK890
+
+         if not re.match(r"^[A-Z]{2}[0-9]{3,4}$|^[0-9][A-Z][0-9]{3,4}$", flight_no):
+                messagebox.showerror(
+                    "Error",
+                    "Invalid Flight Number.\nExample: AI101, 6E2345"
+                )
+                conn.close()
+                return
+         cursor.execute(
+                "SELECT * FROM flights WHERE flight_number=%s",
+                (flight_no,)
+            )
+
+         if cursor.fetchone():
+                messagebox.showerror(
+                    "Error",
+                    "Flight Number already exists."
+                )
+                conn.close()
+                return
+         boarding_time = self.boarding_time.get()
+         departure_time = self.departure_time.get().strip()
+         arrival_time = self.arrival_time.get().strip()
+         # Validate Time Format (HH:MM)
+
+         try:
+            datetime.strptime(boarding_time, "%H:%M")
+            datetime.strptime(departure_time, "%H:%M")
+            datetime.strptime(arrival_time, "%H:%M")
+            if boarding_time >= departure_time:
+                messagebox.showerror(
+                    "Error",
+                    "Boarding Time must be before Departure Time."
+                )
+                conn.close()
+                return
+
+            if departure_time >= arrival_time:
+                messagebox.showerror(
+                    "Error",
+                    "Departure Time must be before Arrival Time."
+                )
+                conn.close()
+                return
+            if departure_time == arrival_time:
+                messagebox.showerror(
+                    "Error",
+                    "Departure and Arrival time cannot be the same."
+                )
+                conn.close()
+                return
+
+         except ValueError:
+            messagebox.showerror(
+                "Error",
+                "Time must be in 24-hour format.\nExample: 08:30 or 17:45"
+            )
+            conn.close()
+            return
+
+         total_seats = self.total_seats.get().strip()
+         # Seats Validation
+
+         if not total_seats.isdigit():
+                messagebox.showerror(
+                    "Error",
+                    "Seats must be numbers only."
+                )
+                conn.close()
+                return
+
+         total_seats = int(total_seats)
+
+         if total_seats <= 0:
+                messagebox.showerror(
+                    "Error",
+                    "Seats must be greater than 0."
+                )
+                conn.close()
+                return
+
+         if total_seats > 500:
+                messagebox.showerror(
+                    "Error",
+                    "Seats cannot exceed 500."
+                )
+                conn.close()
+                return
+         ticket_price = self.ticket_price.get().strip()
+         # Ticket Price Validation
+
+         try:
+            ticket_price = float(ticket_price)
+
+            if ticket_price <= 0:
+                messagebox.showerror(
+                    "Error",
+                    "Ticket price must be greater than 0."
+                )
+                conn.close()
+                return
+
+            if ticket_price > 100000:
+                messagebox.showerror(
+                    "Error",
+                    "Ticket price is too high."
+                )
+                conn.close()
+                return
+
+         except ValueError:
+            messagebox.showerror(
+                "Error",
+                "Ticket price must be numeric."
+            )
+            conn.close()
+            return
+
+
 
          sql = """
-            INSERT INTO flights
+           INSERT INTO flights
             (
-                airline_id,
-                source_airport,
-                destination_airport,
-                flight_number,
-                departure_time,
-                arrival_time,
-                total_seats,
-                available_seats,
-                ticket_price
+            airline_id,
+            source_airport,
+            destination_airport,
+            flight_number,
+            departure_time,
+            arrival_time,
+            boarding_time,
+            total_seats,
+            available_seats,
+            ticket_price,
+            flight_status,
+            gate_no,
+            terminal_no
             )
+
             VALUES
-            (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
 
          cursor.execute(sql,(
-                airline_id,
-                source_id,
-                destination_id,
-                flight_no,
-                departure,
-                arrival,
-                total_seats,
-                total_seats,
-                ticket_price
-         ))
+            airline_id,
+            source_id,
+            destination_id,
+            flight_no,
+            departure_time,
+            arrival_time,
+            boarding_time,
+            total_seats,
+            total_seats,
+            ticket_price,
+            self.flight_status.get(),
+            gate_no,
+            terminal_no
+        ))
+         try:
+            conn.commit()
 
-         conn.commit()
-         self.show_data()
+            self.show_data()
+            self.clear_fields()
 
-         messagebox.showinfo(
+            messagebox.showinfo(
                 "Success",
                 "Flight Added Successfully!"
-         )
-         self.clear_fields()
-         conn.close()
+            )
+
+         except Exception as e:
+            conn.rollback()          # Undo incomplete transaction
+            messagebox.showerror(
+                "Database Error",
+                str(e)
+            )
+
+         finally:
+            conn.close()
 
     def clear_fields(self):
 
@@ -409,8 +644,13 @@ class FlightWindow:
             self.destination.set("")
 
             self.flight_no.delete(0, tk.END)
-            self.departure.delete(0, tk.END)
-            self.arrival.delete(0, tk.END)
+            self.departure_time.delete(0, tk.END)
+            self.arrival_time.delete(0, tk.END)
+            self.boarding_time.delete(0, tk.END)
+
+            self.flight_status.current(0)
+            self.gate_no.delete(0, tk.END)
+            self.terminal_no.delete(0, tk.END)
             self.total_seats.delete(0, tk.END)
             self.ticket_price.delete(0, tk.END)
 
@@ -454,6 +694,7 @@ class FlightWindow:
         )
         destination_id = cursor.fetchone()[0]
 
+
         cursor.execute("""
             UPDATE flights
             SET
@@ -463,6 +704,10 @@ class FlightWindow:
                 flight_number=%s,
                 departure_time=%s,
                 arrival_time=%s,
+                boarding_time=%s,
+                flight_status=%s,
+                gate_no=%s,
+                terminal_no=%s,
                 total_seats=%s,
                 available_seats=%s,
                 ticket_price=%s
@@ -472,8 +717,12 @@ class FlightWindow:
             source_id,
             destination_id,
             self.flight_no.get(),
-            self.departure.get(),
-            self.arrival.get(),
+            self.departure_time.get(),
+            self.arrival_time.get(),
+            self.boarding_time.get(),
+            self.flight_status.get(),
+            self.gate_no.get(),
+            self.terminal_no.get(),
             self.total_seats.get(),
             self.total_seats.get(),
             self.ticket_price.get(),
@@ -539,7 +788,7 @@ class FlightWindow:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT
+          SELECT
                 f.flight_id,
                 a.airline_name,
                 ap1.airport_name,
@@ -547,15 +796,19 @@ class FlightWindow:
                 f.flight_number,
                 f.departure_time,
                 f.arrival_time,
+                f.boarding_time,
+                f.flight_status,
+                f.gate_no,
+                f.terminal_no,
                 f.total_seats,
                 f.ticket_price
             FROM flights f
             JOIN airlines a
-                ON f.airline_id = a.airline_id
+            ON f.airline_id=a.airline_id
             JOIN airports ap1
-                ON f.source_airport = ap1.airport_id
+            ON f.source_airport=ap1.airport_id
             JOIN airports ap2
-                ON f.destination_airport = ap2.airport_id
+            ON f.destination_airport=ap2.airport_id
             ORDER BY f.flight_id
         """)
 
@@ -590,6 +843,10 @@ class FlightWindow:
                 f.flight_number,
                 f.departure_time,
                 f.arrival_time,
+                f.boarding_time,
+                f.flight_status,
+                f.gate_no,
+                f.terminal_no,
                 f.total_seats,
                 f.ticket_price
             FROM flights f

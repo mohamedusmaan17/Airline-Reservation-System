@@ -1,16 +1,17 @@
 
+import smtplib
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
 from datetime import datetime
-from database.db import connect_db
+from email.message import EmailMessage
+from tkinter import messagebox, ttk
+
+import qrcode
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-import qrcode
-from reportlab.lib.utils import ImageReader
-import smtplib
-from email.message import EmailMessage
-import random
+
+from database.db import connect_db
+
+
 class BookingWindow:
 
     def __init__(self, root):
@@ -19,7 +20,7 @@ class BookingWindow:
         self.root.title("Booking Management")
         self.root.geometry("1200x700")
         self.root.configure(bg="white")
-        
+
         title = tk.Label(
             root,
             text="BOOKING MANAGEMENT",
@@ -33,7 +34,7 @@ class BookingWindow:
 
         form = tk.Frame(root, bg="white")
         form.pack(pady=20)
-        
+
         self.passenger = ttk.Combobox(form, width=35,state="readonly")
         self.flight = ttk.Combobox(form, width=35,state="readonly")
         self.booking_date = tk.Entry(form, width=38)
@@ -53,7 +54,7 @@ class BookingWindow:
             state="readonly"
         )
         self.booking_id = None
-        
+
         tk.Label(form, text="Passenger", font=("Arial",12), bg="white").grid(row=0, column=0, padx=10, pady=10)
         self.passenger.grid(row=0, column=1)
 
@@ -74,10 +75,10 @@ class BookingWindow:
 
         tk.Label(form, text="Status", font=("Arial",12), bg="white").grid(row=4, column=0, padx=10, pady=10)
         self.status.grid(row=4, column=1)
-        
+
         button_frame = tk.Frame(root, bg="white")
         button_frame.pack(pady=15)
-        
+
         tk.Button(
             button_frame,
             text="Add",
@@ -112,7 +113,7 @@ class BookingWindow:
             width=15,
             command=self.generate_ticket
         ).grid(row=0, column=4, padx=10)
-        
+
         tk.Button(
             button_frame,
             text="Check-In",
@@ -166,7 +167,7 @@ class BookingWindow:
 
         table_frame = tk.Frame(root)
         table_frame.pack(fill="both", expand=True, padx=20, pady=20)
-        
+
         self.booking_table = ttk.Treeview(
             table_frame,
             columns=(
@@ -228,7 +229,7 @@ class BookingWindow:
          ]
 
          conn.close()
-    
+
     def load_flights(self):
 
         conn = connect_db()
@@ -251,7 +252,7 @@ class BookingWindow:
         ]
 
         conn.close()
-    
+
     def generate_seat(self, flight_id):
 
         conn = connect_db()
@@ -274,7 +275,7 @@ class BookingWindow:
         letters = ["A", "B", "C", "D", "E", "F"]
 
         return f"{row}{letters[col]}"
-    
+
     def check_available_seats(self, flight_id):
 
         conn = connect_db()
@@ -423,7 +424,7 @@ class BookingWindow:
             )
 
             smtp.send_message(msg)
-    
+
     def get_passenger_email(
             self,
             passenger_id
@@ -586,7 +587,7 @@ class BookingWindow:
         self.seat_number.config(state="readonly")
 
         window.destroy()
-    
+
     def add_booking(self):
 
         passenger_name = self.passenger.get()
@@ -620,7 +621,7 @@ class BookingWindow:
             if row[1] == passenger_name:
                 passenger_id = row[0]
                 break
-         
+
         flight_id = None
         for row in self.flight_data:
             if row[1] == flight_number:
@@ -637,8 +638,8 @@ class BookingWindow:
                 "Please select a valid flight."
             )
             return
-        
-       
+
+
         conn = connect_db()
         cursor = conn.cursor()
 
@@ -651,7 +652,7 @@ class BookingWindow:
             )
             conn.close()
             return
-        
+
         # Check whether this seat is already booked
         cursor.execute("""
             SELECT *
@@ -723,12 +724,12 @@ class BookingWindow:
             "Booking Successful",
             f"Booking Added Successfully!\n\nPNR: {pnr}"
         )
-        
+
 
         self.clear_fields()
         self.show_data()
-    
-  
+
+
     def show_data(self):
 
         conn = connect_db()
@@ -997,7 +998,7 @@ class BookingWindow:
         if self.search.get() == "":
             self.search.insert(0, "Search Booking...")
             self.search.config(fg="gray")
-    
+
     def print_boarding_pass(self):
 
         if self.booking_id is None:

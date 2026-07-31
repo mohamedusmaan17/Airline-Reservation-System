@@ -1,7 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
 from datetime import datetime
+from tkinter import messagebox, ttk
 
 from database.db import connect_db
 
@@ -57,7 +56,7 @@ class PaymentWindow:
                 "NETBANKING"
             ]
         )
-       
+
         self.payment_date = tk.Entry(form, width=38)
 
         self.payment_status = ttk.Combobox(
@@ -156,7 +155,7 @@ class PaymentWindow:
             text="Show All",
             command=self.show_data
         ).pack(side="left")
-            
+
         table_frame = tk.Frame(root)
         table_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
@@ -315,7 +314,7 @@ class PaymentWindow:
             self.payment_table.insert("", tk.END, values=row)
 
         conn.close()
-    
+
     def clear_placeholder(self, event):
 
         if self.search.get() == "Search Payment...":
@@ -416,7 +415,7 @@ class PaymentWindow:
                 booking_id,
 
                 self.amount.get(),
-               
+
                 self.payment_method.get(),
 
                 self.payment_date.get(),

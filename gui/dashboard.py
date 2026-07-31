@@ -1,8 +1,12 @@
 import tkinter as tk
 from tkinter import messagebox
-from database.db import connect_db
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+from database.db import connect_db
+
+
 class Dashboard:
 
     def __init__(self, root):
@@ -44,12 +48,12 @@ class Dashboard:
         )
 
         admin.pack(side="right", padx=20)
-        
-        
+
+
         # ==========================
         # LEFT MENU
         # ==========================
-        
+
 
         menu = tk.Frame(root, bg="#E8F0FE", width=220)
         menu.pack(side="left", fill="y")
@@ -140,8 +144,15 @@ class Dashboard:
             font=("Arial", 11),
             command=self.root.destroy
         ).pack(pady=5)
+        tk.Button(
+            menu,
+            text="🖥 Flight Display",
+            width=20,
+            height=2,
+            command=self.open_display
+        ).pack(pady=5)
 
-        
+
         # ==========================
         # MAIN CONTENT
         # ==========================
@@ -204,7 +215,7 @@ class Dashboard:
 
         self.revenue_count = self.card(stats, "Revenue", "₹0", 1, 2)
         self.load_dashboard_statistics()
-        
+
         # ==========================
         # Dashboard Charts
         # ==========================
@@ -364,27 +375,31 @@ class Dashboard:
     def open_airport(self):
 
         import tkinter as tk
+
         from gui.airport import AirportWindow
 
         airport = tk.Toplevel(self.root)
         AirportWindow(airport)
-   
+
     def open_airline(self):
 
         import tkinter as tk
+
         from gui.airline import AirlineWindow
 
         airline = tk.Toplevel(self.root)
         AirlineWindow(airline)
     def open_flight(self):
-        
+
         import tkinter as tk
+
         from gui.flight import FlightWindow
 
         flight = tk.Toplevel(self.root)
         FlightWindow(flight)
     def open_passenger(self):
         import tkinter as tk
+
         from gui.passenger import PassengerWindow
 
         passenger = tk.Toplevel(self.root)
@@ -392,14 +407,16 @@ class Dashboard:
     def open_booking(self):
 
         import tkinter as tk
+
         from gui.booking import BookingWindow
 
         booking = tk.Toplevel(self.root)
         BookingWindow(booking)
-    
+
     def open_payment(self):
 
         import tkinter as tk
+
         from gui.payment import PaymentWindow
 
         payment = tk.Toplevel(self.root)
@@ -520,6 +537,7 @@ class Dashboard:
     def open_report(self):
 
         import tkinter as tk
+
         from gui.report import ReportWindow
 
         report = tk.Toplevel(self.root)
@@ -528,12 +546,13 @@ class Dashboard:
     def open_database_tools(self):
 
         import tkinter as tk
+
         from gui.database_tools import DatabaseTools
 
         window = tk.Toplevel(self.root)
 
         DatabaseTools(window)
-    
+
     def get_total_passengers(self):
 
         conn = connect_db()
@@ -564,7 +583,7 @@ class Dashboard:
         conn.close()
 
         return total
-    
+
     def get_total_bookings(self):
 
         conn = connect_db()
@@ -580,7 +599,7 @@ class Dashboard:
         conn.close()
 
         return total
-    
+
     def get_total_airlines(self):
 
         conn = connect_db()
@@ -628,3 +647,12 @@ class Dashboard:
         conn.close()
 
         return total
+    def open_display(self):
+
+        import tkinter as tk
+
+        from gui.flight_display import FlightDisplay
+
+        window = tk.Toplevel(self.root)
+
+        FlightDisplay(window)

@@ -1,9 +1,6 @@
 import tkinter as tk
 
-from database.backup_restore import (
-    backup_database,
-    restore_database
-)
+from database.backup_restore import backup_database, restore_database
 
 
 class DatabaseTools:

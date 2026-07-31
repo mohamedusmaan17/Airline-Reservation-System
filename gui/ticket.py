@@ -1,7 +1,9 @@
-from reportlab.platypus import *
+from tkinter import messagebox
+
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-from tkinter import messagebox
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
 from database.db import connect_db
 
 
@@ -12,10 +14,14 @@ class TicketGenerator:
         conn = connect_db()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+        placeholder = "?" if is_sqlite else "%s"
+
+        cursor.execute(f"""
         SELECT
             b.booking_id,
-            CONCAT(p.first_name,' ',p.last_name),
+            p.first_name,
+            p.last_name,
             f.flight_number,
             b.seat_number,
             b.booking_date,
@@ -27,7 +33,7 @@ class TicketGenerator:
             ON b.passenger_id = p.passenger_id
         JOIN flights f
             ON b.flight_id = f.flight_id
-        WHERE b.booking_id=%s
+        WHERE b.booking_id={placeholder}
         """, (booking_id,))
 
         row = cursor.fetchone()
@@ -55,15 +61,17 @@ class TicketGenerator:
 
         story.append(Spacer(1, 20))
 
+        passenger_name = f"{row[1] or ''} {row[2] or ''}".strip() or "N/A"
+
         data = [
             ["Booking ID", row[0]],
-            ["Passenger", row[1]],
-            ["Flight Number", row[2]],
-            ["Seat Number", row[3]],
-            ["Booking Date", str(row[4])],
-            ["Booking Status", row[5]],
-            ["Passport Number", row[6]],
-            ["Email", row[7]]
+            ["Passenger", passenger_name],
+            ["Flight Number", row[3]],
+            ["Seat Number", row[4]],
+            ["Booking Date", str(row[5])],
+            ["Booking Status", row[6]],
+            ["Passport Number", row[7] or "N/A"],
+            ["Email", row[8] or "N/A"]
         ]
 
         table = Table(data, colWidths=[180, 250])

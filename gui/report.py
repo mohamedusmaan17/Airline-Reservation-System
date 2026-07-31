@@ -1,14 +1,13 @@
 import tkinter as tk
-from tkinter import ttk
-from database.db import connect_db
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
+
 from openpyxl import Workbook
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import Paragraph
-from reportlab.lib.units import inch
-from tkinter import filedialog
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Table, TableStyle
+
+from database.db import connect_db
+
 
 class ReportWindow:
 
@@ -173,7 +172,7 @@ class ReportWindow:
 
             widths = [70,120,120,90,100,120,200,120,120]
 
-            for col, width in zip(self.report_table["columns"], widths):
+            for col, width in zip(self.report_table["columns"], widths, strict=False):
                 self.report_table.heading(col, text=col)
                 self.report_table.column(
                     col,
@@ -187,7 +186,7 @@ class ReportWindow:
 
         except Exception as e:
             messagebox.showerror("Database Error", str(e))
-    
+
     def flight_report(self):
 
         try:
@@ -301,7 +300,7 @@ class ReportWindow:
 
             widths = [90, 180, 100, 80, 170, 120]
 
-            for col, width in zip(columns, widths):
+            for col, width in zip(columns, widths, strict=False):
                 self.report_table.heading(col, text=col)
                 self.report_table.column(col, width=width, anchor="center")
 
@@ -366,7 +365,7 @@ class ReportWindow:
 
             widths = [90, 180, 100, 100, 140, 180, 120]
 
-            for col, width in zip(columns, widths):
+            for col, width in zip(columns, widths, strict=False):
                 self.report_table.heading(col, text=col)
                 self.report_table.column(
                     col,
@@ -388,7 +387,7 @@ class ReportWindow:
                 "Database Error",
                 str(e)
             )
-    
+
     def export_excel(self):
 
         if not self.report_table.get_children():

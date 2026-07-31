@@ -1,10 +1,12 @@
-import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from tkcalendar import DateEntry
-from datetime import datetime,date
 import re
+import tkinter as tk
+from datetime import date, datetime
+from tkinter import messagebox, ttk
+
+from tkcalendar import DateEntry
+
 from database.db import connect_db
+
 COUNTRY_CODES = {
     "India": "+91",
     "United States": "+1",
@@ -97,11 +99,11 @@ class PassengerWindow:
             maxdate=date.today()
         )
         self.dob.grid(row=3, column=1)
-      
+
         # Phone
         tk.Label(form, text="Phone", bg="white",
                 font=("Arial",12)).grid(row=4,column=0,padx=10,pady=10)
-        
+
         phone_frame = tk.Frame(form, bg="white")
         phone_frame.grid(row=4, column=1)
 
@@ -129,7 +131,7 @@ class PassengerWindow:
             validatecommand=(vcmd, "%P")
         )
         self.phone.insert(0, "Enter 10-digit Phone")
-       
+
         self.phone.bind("<FocusIn>", self.clear_phone_placeholder)
         self.phone.bind("<FocusOut>", self.restore_phone_placeholder)
 
@@ -320,7 +322,6 @@ class PassengerWindow:
     # ==========================
     def validate_inputs(self):
 
-        import re
 
         first_name = self.first_name.get().strip()
         last_name = self.last_name.get().strip()
@@ -353,7 +354,7 @@ class PassengerWindow:
                 "Only alphabets are allowed."
             )
             return False
-        
+
         if self.gender.get() == "":
             messagebox.showerror(
                 "Error",
@@ -459,7 +460,7 @@ class PassengerWindow:
         return age
     def add_passenger(self):
 
-        
+
         if self.first_name.get() == "":
             messagebox.showerror(
                 "Error",
@@ -470,7 +471,7 @@ class PassengerWindow:
             return
         conn = connect_db()
         cursor = conn.cursor()
-        
+
         cursor.execute(
             "SELECT * FROM passengers WHERE passport_number=%s",
             (self.passport.get().strip(),)
@@ -483,7 +484,7 @@ class PassengerWindow:
             )
             conn.close()
             return
-        
+
         cursor.execute(
             "SELECT * FROM passengers WHERE email=%s",
             (self.email.get().strip(),)
@@ -496,7 +497,7 @@ class PassengerWindow:
             )
             conn.close()
             return
-        
+
         sql = """
         INSERT INTO passengers
         (
@@ -539,7 +540,7 @@ class PassengerWindow:
 
         self.show_data()
         self.clear_fields()
-    
+
     def update_passenger(self):
 
         if self.passenger_id is None:
@@ -610,7 +611,7 @@ class PassengerWindow:
 
         conn = connect_db()
         cursor = conn.cursor()
-        
+
         confirm = messagebox.askyesno(
             "Confirm Delete",
             "Are you sure you want to delete this passenger?"
@@ -658,7 +659,7 @@ class PassengerWindow:
         cursor_row = self.passenger_table.focus()
         contents = self.passenger_table.item(cursor_row)
         row = contents["values"]
-     
+
 
         if len(row) == 0:
             return
@@ -793,8 +794,8 @@ class PassengerWindow:
         if self.first_name.get() == "":
             self.first_name.insert(0, "Enter First Name")
             self.first_name.config(fg="gray")
-    
-   
+
+
     def clear_email_placeholder(self, event):
         if self.email.get() == "example@gmail.com":
             self.email.delete(0, tk.END)
@@ -805,7 +806,7 @@ class PassengerWindow:
         if self.email.get() == "":
             self.email.insert(0, "example@gmail.com")
             self.email.config(fg="gray")
-    
+
     def clear_phone_placeholder(self, event):
         if self.phone.get() == "Enter 10-digit Phone":
             self.phone.delete(0, tk.END)
@@ -827,7 +828,7 @@ class PassengerWindow:
         if self.last_name.get() == "":
             self.last_name.insert(0, "Enter Last Name")
             self.last_name.config(fg="gray")
-    
+
     def clear_passport_placeholder(self, event):
         if self.passport.get() == "Enter Passport Number":
             self.passport.delete(0, tk.END)
@@ -838,7 +839,7 @@ class PassengerWindow:
         if self.passport.get() == "":
             self.passport.insert(0, "Enter Passport Number")
             self.passport.config(fg="gray")
-    
+
     def clear_nationality_placeholder(self, event):
         if self.nationality.get() == "Enter Nationality":
             self.nationality.delete(0, tk.END)
@@ -849,7 +850,7 @@ class PassengerWindow:
         if self.nationality.get() == "":
             self.nationality.insert(0, "Enter Nationality")
             self.nationality.config(fg="gray")
-    
+
     def update_country_code(self, event=None):
 
         country = self.nationality.get()

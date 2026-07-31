@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
+
 from database.db import connect_db
-from tkinter import ttk
+
 
 class AirportWindow:
 
@@ -309,7 +310,7 @@ class AirportWindow:
 
         conn.close()
     def show_data(self):
-        self.load_airports() 
+        self.load_airports()
     def clear_placeholder(self, event):
 
         if self.search.get() == "Search Airport...":

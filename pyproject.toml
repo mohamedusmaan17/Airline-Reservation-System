@@ -1,0 +1,66 @@
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I", "UP"]
+ignore = ["B008", "E501", "BLE001", "DTZ", "B905"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Body", "fastapi.Header", "Depends", "Query", "Path", "Body", "Header"]
+
+[tool.pyright]
+pythonVersion = "3.10"
+pythonPlatform = "Windows"
+pythonPath = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+reportMissingImports = false
+reportMissingModuleSource = false
+extraPaths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+
+[tool.pyrefly]
+python-executable = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+python_executable = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+python-interpreter = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+python_interpreter = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+python-environment = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+python_environment = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
+report-missing-imports = false
+report_missing_imports = false
+search-paths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+search_paths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+search-path-overrides = [
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+search_path_overrides = [
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+extra-paths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+extra_paths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+
+[tool.pyrefly.errors]
+report-missing-imports = false
+report_missing_imports = false
+
+
+

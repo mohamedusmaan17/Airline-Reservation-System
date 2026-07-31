@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SkyBooker — Next-Generation Airline Reservation System with AI Price Prediction, Delay Estimation, OCR Passenger Scanner, Live Flight Radar, and Chart.js Analytics.">
+    <title>✈ SkyBooker — Premium Airline Reservation System</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js CDN for Admin Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom Styling -->
+    <link rel="stylesheet" href="/static/css/style.css?v=20260731_v3">
+</head>
+
+<body>
+    <!-- Main Navigation Bar -->
+    <nav id="main-nav" class="navbar">
+        <div class="nav-brand" onclick="navigate('flight-search')">
+            <div class="logo-icon">✈</div>
+            <div class="brand-text">
+                <span class="brand-name">SkyBooker</span>
+                <span class="brand-tag">AI Powered</span>
+            </div>
+        </div>
+
+        <div class="nav-links" id="nav-links">
+            <!-- Dynamically populated by JS -->
+        </div>
+
+        <div class="nav-actions">
+            <!-- Quick Demo Role Switcher -->
+            <div class="quick-demo-switcher">
+                <span class="demo-label"><i class="fa-solid fa-bolt"></i> Demo:</span>
+                <button class="btn-demo-pill" onclick="quickLogin('john', 'john123')">Customer</button>
+                <button class="btn-demo-pill admin-pill" onclick="quickLogin('admin', 'admin123')">Admin</button>
+            </div>
+
+            <!-- Language Switcher -->
+            <div class="lang-selector">
+                <i class="fa-solid fa-globe"></i>
+                <select id="lang-select" onchange="changeLanguage(this.value)">
+                    <option value="en">English (EN)</option>
+                    <option value="hi">हिंदी (HI)</option>
+                    <option value="es">Español (ES)</option>
+                    <option value="fr">Français (FR)</option>
+                </select>
+            </div>
+
+            <!-- Theme Switcher -->
+            <button class="btn-theme-toggle" id="theme-toggle-btn" title="Toggle Light/Dark Mode" onclick="toggleTheme()">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- User Drawer Container -->
+            <div class="nav-user" id="nav-user">
+                <!-- Dynamically populated -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Main Content Area -->
+    <main id="app" class="app-container page-enter">
+        <!-- SPA Pages Rendered Here -->
+    </main>
+
+    <!-- Floating AI Chatbot Widget -->
+    <div id="ai-chatbot-widget" class="chatbot-widget">
+        <button id="chatbot-toggle-btn" class="chatbot-fab" onclick="toggleChatbot()">
+            <i class="fa-solid fa-robot"></i>
+            <span class="chatbot-badge-ping"></span>
+        </button>
+
+        <div id="chatbot-panel" class="chatbot-panel" style="display:none;">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <i class="fa-solid fa-robot text-accent"></i>
+                    <div>
+                        <h4>SkyBot AI Assistant</h4>
+                        <span class="online-status">● Live Flight AI</span>
+                    </div>
+                </div>
+                <button class="chatbot-close-btn" onclick="toggleChatbot()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div id="chatbot-messages" class="chatbot-messages">
+                <div class="chat-msg bot">
+                    <div class="msg-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="msg-content">
+                        👋 Hi! I'm your <strong>SkyBooker AI Assistant</strong>. Ask me anything like:
+                        <div class="chat-quick-pills mt-xs">
+                            <button onclick="sendQuickPrompt('Search flights to Mumbai')">✈ Flights to Mumbai</button>
+                            <button onclick="sendQuickPrompt('How do I check in?')">🎫 Check-in info</button>
+                            <button onclick="sendQuickPrompt('What is my loyalty tier?')">⭐ Loyalty rewards</button>
+                            <button onclick="sendQuickPrompt('Baggage rules')">🧳 Baggage allowance</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chatbot-input-bar">
+                <input type="text" id="chatbot-input" placeholder="Type or click voice..." onkeypress="handleChatKeyPress(event)">
+                <button id="chatbot-mic-btn" class="mic-btn" title="Voice Command" onclick="startVoiceAssistant()"><i class="fa-solid fa-microphone"></i></button>
+                <button class="send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Interactive Payment Gateway -->
+    <div id="payment-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-shield-halved text-success"></i> Secure Checkout Gateway</h3>
+                <button class="modal-close" onclick="closeModal('payment-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="payment-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: E-Ticket PDF View -->
+    <div id="eticket-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover ticket-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-ticket text-accent"></i> Official E-Ticket & Boarding Pass</h3>
+                <button class="modal-close" onclick="closeModal('eticket-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="eticket-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: PDF Invoice View -->
+    <div id="invoice-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-invoice-dollar text-primary"></i> Tax Invoice & Receipt</h3>
+                <button class="modal-close" onclick="closeModal('invoice-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="invoice-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Reschedule Flight -->
+    <div id="reschedule-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-days text-warning"></i> Reschedule Flight</h3>
+                <button class="modal-close" onclick="closeModal('reschedule-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="reschedule-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: OCR ID Auto-fill Scanner -->
+    <div id="ocr-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-id-card text-accent"></i> AI OCR ID / Passport Reader</h3>
+                <button class="modal-close" onclick="closeModal('ocr-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="ocr-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Submit Customer Review -->
+    <div id="review-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-star text-warning"></i> Submit Flight Review</h3>
+                <button class="modal-close" onclick="closeModal('review-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="review-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Live Flight Status Radar Tracker -->
+    <div id="flight-radar-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-card glass-card no-hover radar-modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-plane-flight text-accent"></i> Live Flight Radar Status</h3>
+                <button class="modal-close" onclick="closeModal('flight-radar-modal')">&times;</button>
+            </div>
+            <div class="modal-body" id="flight-radar-modal-body">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main JavaScript App -->
+    <script src="/static/js/app.js?v=20260801_v8_admin_fix"></script>
+</body>
+</html>
+
+
+
+
+
+
