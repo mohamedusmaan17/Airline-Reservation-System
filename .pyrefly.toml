@@ -1,0 +1,17 @@
+project-root = "."
+
+search-paths = [
+  ".",
+  "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",
+  "C:/Users/jaffa/AppData/Roaming/Python/Python310/site-packages"
+]
+
+[errors]
+report-missing-imports = false
+untyped-import = false
+bad-argument-type = false
+no-matching-overload = false
+bad-index = false
+deprecated = false
+missing-attribute = false
+bad-return-type = false
