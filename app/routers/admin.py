@@ -11,13 +11,11 @@ from app.models.booking import Booking
 from app.models.flight import Flight
 from app.models.passenger import Passenger
 from app.models.payment import Payment
+from app.models.review import Review
 from app.schemas.booking import PassengerCreate, PassengerResponse
 from app.utils.deps import require_admin
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
-
-
-from app.models.review import Review
 
 
 # ── Dashboard Stats ────────────────────────────────────

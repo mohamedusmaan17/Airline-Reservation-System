@@ -75,8 +75,10 @@ def _airport_distance_km(db: Session, source_id: int, dest_id: int) -> float:
     if not src or not dst:
         return 1500.0  # Default fallback
 
-    src_coords = _get_coords(src.airport_code or "")
-    dst_coords = _get_coords(dst.airport_code or "")
+    src_code = str(getattr(src, "airport_code", "") or "")
+    dst_code = str(getattr(dst, "airport_code", "") or "")
+    src_coords = _get_coords(src_code)
+    dst_coords = _get_coords(dst_code)
     return _haversine_km(*src_coords, *dst_coords)
 
 
@@ -93,7 +95,9 @@ def predict_price(req: PricePredictionRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Flight not found")
 
     # Simulate demand signal: low availability → higher predicted price change
-    occupancy = 1 - (flight.available_seats / max(flight.total_seats, 1))
+    avail_seats = float(getattr(flight, "available_seats", 0) or 0)
+    total_seats = float(getattr(flight, "total_seats", 1) or 1)
+    occupancy = 1.0 - (avail_seats / max(total_seats, 1.0))
     days_to_flight = 30
     if flight.flight_date:
         delta = (flight.flight_date - date.today()).days
@@ -126,7 +130,7 @@ def predict_price(req: PricePredictionRequest, db: Session = Depends(get_db)):
         "price_direction": direction,
         "predicted_change_pct": pct,
         "urgency": urgency,
-        "occupancy_pct": round(occupancy * 100, 1),
+        "occupancy_pct": round(float(occupancy * 100), 1),
         "days_to_flight": days_to_flight,
         "message": message,
     }
@@ -162,10 +166,12 @@ def predict_delay(flight_id: int, db: Session = Depends(get_db)):
         base_risk += 15  # Evening cascade delays
     if day_of_week in (4, 6):  # Friday, Sunday
         base_risk += 12
-    occupancy = 1 - (flight.available_seats / max(flight.total_seats, 1))
+    avail_seats = float(getattr(flight, "available_seats", 0) or 0)
+    total_seats = float(getattr(flight, "total_seats", 1) or 1)
+    occupancy = 1.0 - (avail_seats / max(total_seats, 1.0))
     base_risk += occupancy * 10
 
-    delay_prob = min(95, max(5, round(base_risk + random.uniform(-3, 3), 1)))
+    delay_prob = min(95, max(5, round(float(base_risk + random.uniform(-3, 3)), 1)))
 
     if delay_prob < 25:
         level = "low"
@@ -193,7 +199,7 @@ def predict_delay(flight_id: int, db: Session = Depends(get_db)):
         "expected_delay": expected_delay,
         "factors": {
             "departure_hour": dep_hour,
-            "occupancy_pct": round(occupancy * 100, 1),
+            "occupancy_pct": round(float(occupancy * 100), 1),
             "day_of_week": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][day_of_week],
         },
     }
@@ -225,8 +231,9 @@ def recommend_seats(flight_id: int, db: Session = Depends(get_db)):
             score += 15
         # Prefer earlier rows (lower number)
         try:
-            row = int(re.sub(r"\D", "", s.seat_number))
-            score -= row * 0.5
+            seat_num_str = str(getattr(s, "seat_number", "") or "")
+            row_num = int(re.sub(r"\D", "", seat_num_str))
+            score -= row_num * 0.5
         except ValueError:
             pass
         return score
@@ -267,7 +274,9 @@ def carbon_footprint(flight_id: int, db: Session = Depends(get_db)):
     if not flight:
         raise HTTPException(status_code=404, detail="Flight not found")
 
-    distance_km = _airport_distance_km(db, flight.source_airport, flight.destination_airport)
+    src_id = int(getattr(flight, "source_airport", 0) or 0)
+    dst_id = int(getattr(flight, "destination_airport", 0) or 0)
+    distance_km = _airport_distance_km(db, src_id, dst_id)
 
     # ICAO emission factor: ~0.255 kg CO₂ per km per passenger (economy)
     co2_kg = round(distance_km * 0.255, 1)

@@ -1,6 +1,7 @@
+from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -8,11 +9,26 @@ from app.database import SessionLocal, create_tables
 from app.routers import admin, ai, auth, bookings, flights, reviews
 from app.utils.seed import seed_database
 
+
+# ── Lifespan Event Handler ─────────────────────────────
+@asynccontextmanager
+async def lifespan(app_instance: FastAPI):
+    """Create tables and seed data on application startup."""
+    create_tables()
+    db = SessionLocal()
+    try:
+        seed_database(db)
+    finally:
+        db.close()
+    yield
+
+
 # ── Create the FastAPI app ─────────────────────────────
 app = FastAPI(
     title="Airline Reservation System",
     description="A modern airline reservation system with seat selection, booking management, and admin dashboard.",
     version="2.0.0",
+    lifespan=lifespan,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,22 +43,6 @@ app.include_router(bookings.router)
 app.include_router(admin.router)
 app.include_router(ai.router)
 app.include_router(reviews.router)
-
-
-
-# ── Startup event ──────────────────────────────────────
-@app.on_event("startup")
-def on_startup():
-    """Create tables and seed data on first run."""
-    create_tables()
-    db = SessionLocal()
-    try:
-        seed_database(db)
-    finally:
-        db.close()
-
-
-from fastapi import HTTPException
 
 
 # ── Serve the SPA ──────────────────────────────────────

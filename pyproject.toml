@@ -65,6 +65,9 @@ untyped-import = false
 untyped_import = false
 bad-index = false
 bad_index = false
+deprecated = false
+no-matching-overload = false
+bad-argument-type = false
 
 
 
