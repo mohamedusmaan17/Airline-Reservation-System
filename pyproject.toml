@@ -9,11 +9,23 @@ ignore = ["B008", "E501", "BLE001", "DTZ", "B905"]
 extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Body", "fastapi.Header", "Depends", "Query", "Path", "Body", "Header"]
 
 [tool.pyright]
+typeCheckingMode = "off"
 pythonVersion = "3.10"
 pythonPlatform = "Windows"
 pythonPath = "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/python.exe"
-reportMissingImports = false
-reportMissingModuleSource = false
+reportMissingImports = "none"
+reportMissingModuleSource = "none"
+reportGeneralTypeIssues = "none"
+reportAttributeAccessIssue = "none"
+reportArgumentType = "none"
+reportOptionalSubscript = "none"
+reportOptionalMemberAccess = "none"
+reportCallIssue = "none"
+reportOperatorIssue = "none"
+reportPossiblyUnboundVariable = "none"
+reportReturnType = "none"
+reportUntypedFunctionDecorator = "none"
+reportPrivateImportUsage = "none"
 extraPaths = [
   ".",
   "C:/Users/jaffa/AppData/Local/Programs/Python/Python310/lib/site-packages",

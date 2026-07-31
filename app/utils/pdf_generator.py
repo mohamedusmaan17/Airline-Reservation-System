@@ -1,16 +1,16 @@
 import io
 
-import qrcode
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.units import inch
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+import qrcode  # type: ignore[import-untyped]
+from reportlab.lib import colors  # type: ignore[import-untyped]
+from reportlab.lib.pagesizes import letter  # type: ignore[import-untyped]
+from reportlab.lib.units import inch  # type: ignore[import-untyped]
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # type: ignore[import-untyped]
 
 try:
-    from reportlab.platypus import HRFlowable
+    from reportlab.platypus import HRFlowable  # type: ignore[import-untyped]
 except ImportError:
-    from reportlab.platypus.flowables import HRFlowable
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    from reportlab.platypus.flowables import HRFlowable  # type: ignore[import-untyped]
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet  # type: ignore[import-untyped]
 
 
 def generate_ticket_pdf(

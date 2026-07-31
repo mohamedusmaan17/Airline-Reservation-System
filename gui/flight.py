@@ -1,3 +1,8 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import re
 import tkinter as tk
 from datetime import datetime
@@ -262,7 +267,10 @@ class FlightWindow:
 
         rows = cursor.fetchall()
 
-        self.airline["values"] = [row[0] for row in rows]
+        self.airline["values"] = [
+            str(row[0]) if isinstance(row, (tuple, list)) else str(next(iter(row.values())))
+            for row in rows
+        ]
 
         conn.close()
     def load_airports(self):
@@ -278,7 +286,10 @@ class FlightWindow:
 
         rows = cursor.fetchall()
 
-        names = [row[0] for row in rows]
+        names = [
+            str(row[0]) if isinstance(row, (tuple, list)) else str(next(iter(row.values())))
+            for row in rows
+        ]
 
         self.source["values"] = names
         self.destination["values"] = names
@@ -424,7 +435,7 @@ class FlightWindow:
              conn.close()
              return
 
-         airline_id = row[0]
+         airline_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
 
             # Get Source Airport ID
          cursor.execute(
@@ -441,11 +452,11 @@ class FlightWindow:
            conn.close()
            return
 
-         source_id = row[0]
+         source_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
             # Get Destination Airport ID
          cursor.execute(
               f"SELECT airport_id FROM airports WHERE airport_name={p}",
-               (self.destination.get(),)
+                (self.destination.get(),)
             )
          row = cursor.fetchone()
 
@@ -457,7 +468,7 @@ class FlightWindow:
             conn.close()
             return
 
-         destination_id = row[0]
+         destination_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
             # Get values from Entry widgets
          flight_no = self.flight_no.get().strip().upper()
          # Flight Number Format
@@ -664,6 +675,8 @@ class FlightWindow:
                 "Please select a flight."
             )
             return
+        flight_id = self.flight_id
+
         if self.source.get() == self.destination.get():
             messagebox.showerror(
                 "Error",
@@ -682,21 +695,42 @@ class FlightWindow:
             f"SELECT airline_id FROM airlines WHERE airline_name={p}",
             (self.airline.get(),)
         )
-        airline_id = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        if row is None:
+            messagebox.showerror("Error", "Please select a valid airline.")
+            conn.close()
+            return
+        airline_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
 
         # Source Airport ID
         cursor.execute(
             f"SELECT airport_id FROM airports WHERE airport_name={p}",
             (self.source.get(),)
         )
-        source_id = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        if row is None:
+            messagebox.showerror("Error", "Please select a valid source airport.")
+            conn.close()
+            return
+        source_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
 
         # Destination Airport ID
         cursor.execute(
             f"SELECT airport_id FROM airports WHERE airport_name={p}",
             (self.destination.get(),)
         )
-        destination_id = cursor.fetchone()[0]
+        row = cursor.fetchone()
+        if row is None:
+            messagebox.showerror("Error", "Please select a valid destination airport.")
+            conn.close()
+            return
+        destination_id: int = int(str(row[0] if isinstance(row, (tuple, list)) else list(row.values())[0]))
+
+        total_seats_val = int(self.total_seats.get()) if self.total_seats.get().isdigit() else 0
+        try:
+            ticket_price_val = float(self.ticket_price.get())
+        except ValueError:
+            ticket_price_val = 0.0
 
         cursor.execute(f"""
             UPDATE flights
@@ -726,10 +760,10 @@ class FlightWindow:
             self.flight_status.get(),
             self.gate_no.get(),
             self.terminal_no.get(),
-            self.total_seats.get(),
-            self.total_seats.get(),
-            self.ticket_price.get(),
-            self.flight_id
+            total_seats_val,
+            total_seats_val,
+            ticket_price_val,
+            flight_id
         ))
 
         conn.commit()
@@ -823,7 +857,8 @@ class FlightWindow:
         self.flight_table.delete(*self.flight_table.get_children())
 
         for row in rows:
-            self.flight_table.insert("", tk.END, values=row)
+            val_tuple = tuple(row) if isinstance(row, (tuple, list)) else tuple(row.values())
+            self.flight_table.insert("", tk.END, values=val_tuple)
 
         conn.close()
     def search_data(self):
@@ -887,7 +922,8 @@ class FlightWindow:
         self.flight_table.delete(*self.flight_table.get_children())
 
         for row in rows:
-            self.flight_table.insert("", tk.END, values=row)
+            val_tuple = tuple(row) if isinstance(row, (tuple, list)) else tuple(row.values())
+            self.flight_table.insert("", tk.END, values=val_tuple)
 
         conn.close()
     def clear_placeholder(self, event):
@@ -905,3 +941,9 @@ class FlightWindow:
             self.search.config(fg="gray")
     def live_search(self, event):
         self.search_data()
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FlightWindow(root)
+    root.mainloop()

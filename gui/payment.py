@@ -1,3 +1,7 @@
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, ttk
@@ -191,7 +195,10 @@ class PaymentWindow:
         self.payment_table.column("payment_date", width=170, anchor="center")
         self.payment_table.column("payment_status", width=100, anchor="center")
 
-        self.payment_table.pack(fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=self.payment_table.yview)
+        self.payment_table.configure(yscrollcommand=scrollbar.set)
+        scrollbar.pack(side="right", fill="y")
+        self.payment_table.pack(fill="both", expand=True, side="left")
         self.payment_table.bind(
             "<ButtonRelease-1>",
             self.get_cursor
@@ -403,12 +410,6 @@ class PaymentWindow:
             )
             VALUES (%s,%s,%s,%s,%s)
             """
-            print("Booking :", self.booking.get())
-            print("Amount :", self.amount.get())
-            print("Method :", self.payment_method.get())
-            print("Date :", self.payment_date.get())
-            print("Status :", self.payment_status.get())
-            print("Payment Status =", repr(self.payment_status.get()))
 
             cursor.execute(sql, (
 
@@ -590,3 +591,9 @@ class PaymentWindow:
         self.payment_status.set("")
 
         self.payment_id = None
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    PaymentWindow(root)
+    root.mainloop()
