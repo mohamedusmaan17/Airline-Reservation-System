@@ -46,6 +46,19 @@ class TicketGenerator:
             )
             return
 
+        if isinstance(row, dict):
+            b_id = row.get("booking_id")
+            first_name = row.get("first_name", "")
+            last_name = row.get("last_name", "")
+            flight_num = row.get("flight_number")
+            seat_num = row.get("seat_number")
+            b_date = row.get("booking_date")
+            b_status = row.get("booking_status")
+            passport_num = row.get("passport_number")
+            email_addr = row.get("email")
+        else:
+            b_id, first_name, last_name, flight_num, seat_num, b_date, b_status, passport_num, email_addr = row
+
         file_name = f"Ticket_{booking_id}.pdf"
 
         doc = SimpleDocTemplate(file_name)
@@ -61,17 +74,17 @@ class TicketGenerator:
 
         story.append(Spacer(1, 20))
 
-        passenger_name = f"{row[1] or ''} {row[2] or ''}".strip() or "N/A"
+        passenger_name = f"{first_name or ''} {last_name or ''}".strip() or "N/A"
 
         data = [
-            ["Booking ID", row[0]],
+            ["Booking ID", b_id],
             ["Passenger", passenger_name],
-            ["Flight Number", row[3]],
-            ["Seat Number", row[4]],
-            ["Booking Date", str(row[5])],
-            ["Booking Status", row[6]],
-            ["Passport Number", row[7] or "N/A"],
-            ["Email", row[8] or "N/A"]
+            ["Flight Number", flight_num],
+            ["Seat Number", seat_num],
+            ["Booking Date", str(b_date)],
+            ["Booking Status", b_status],
+            ["Passport Number", passport_num or "N/A"],
+            ["Email", email_addr or "N/A"]
         ]
 
         table = Table(data, colWidths=[180, 250])

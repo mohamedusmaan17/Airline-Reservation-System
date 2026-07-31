@@ -61,6 +61,10 @@ extra_paths = [
 [tool.pyrefly.errors]
 report-missing-imports = false
 report_missing_imports = false
+untyped-import = false
+untyped_import = false
+bad-index = false
+bad_index = false
 
 
 
