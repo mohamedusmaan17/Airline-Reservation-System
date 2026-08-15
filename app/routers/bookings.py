@@ -107,6 +107,12 @@ def create_booking(
     db.add(payment)
     db.commit()
 
+    # Automatically generate ticket PDF, store in tickets folder & save to SQL DB
+    try:
+        generate_and_save_ticket(booking, db)
+    except Exception as e:
+        print(f"Warning: Failed to pre-generate ticket PDF: {e}")
+
     return _build_booking_response(booking, db)
 
 
@@ -132,23 +138,18 @@ def get_all_bookings(db: Session = Depends(get_db)):
     return [_build_booking_response(b, db) for b in bookings]
 
 
-@router.get("/{booking_id}/pdf")
-def download_ticket_pdf(booking_id: int, db: Session = Depends(get_db)):
-    """Generate and return a professional Boarding Pass & Tax Invoice PDF with QR code."""
-    from fastapi.responses import Response
-
+def generate_and_save_ticket(booking: Booking, db: Session) -> bytes:
+    """Generate ticket PDF, save to tickets folder, and persist BLOB & path in SQL DB."""
+    from pathlib import Path
     from app.models.airline import Airline
     from app.models.airport import Airport
+    from app.models.ticket import Ticket
     from app.utils.pdf_generator import generate_ticket_pdf
-
-    booking = db.query(Booking).filter(Booking.booking_id == booking_id).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
 
     passenger = db.query(Passenger).filter(Passenger.passenger_id == booking.passenger_id).first()
     flight = db.query(Flight).filter(Flight.flight_id == booking.flight_id).first()
     seat = db.query(Seat).filter(Seat.seat_id == booking.seat_id).first() if booking.seat_id else None
-    payment = db.query(Payment).filter(Payment.booking_id == booking_id).first()
+    payment = db.query(Payment).filter(Payment.booking_id == booking.booking_id).first()
 
     airline_name = "SkyBooker Express"
     source_name = "Origin"
@@ -165,8 +166,10 @@ def download_ticket_pdf(booking_id: int, db: Session = Depends(get_db)):
         if dst:
             destination_name = f"{dst.city} ({dst.airport_code})"
 
+    pnr = booking.pnr or f"SK-{booking.booking_id}"
+
     pdf_bytes = generate_ticket_pdf(
-        pnr=booking.pnr or f"SK-{booking.booking_id}",
+        pnr=pnr,
         passenger_name=f"{passenger.first_name} {passenger.last_name}" if passenger else "Passenger",
         email=passenger.email if passenger else "n/a",
         phone=passenger.phone if passenger else "n/a",
@@ -190,6 +193,44 @@ def download_ticket_pdf(booking_id: int, db: Session = Depends(get_db)):
         ticket_url=f"http://localhost:8000/api/bookings/{booking.booking_id}/pdf",
     )
 
+    # 1. Store in tickets directory
+    tickets_dir = Path(__file__).resolve().parent.parent.parent / "tickets"
+    tickets_dir.mkdir(parents=True, exist_ok=True)
+
+    file_name = f"Ticket_{pnr}.pdf"
+    file_path = str(tickets_dir / file_name)
+    rel_path = f"tickets/{file_name}"
+
+    with open(file_path, "wb") as f:
+        f.write(pdf_bytes)
+
+    # 2. Persist in SQL Database (tickets table)
+    existing_ticket = db.query(Ticket).filter(Ticket.booking_id == booking.booking_id).first()
+    if existing_ticket:
+        existing_ticket.file_path = rel_path
+        existing_ticket.pdf_data = pdf_bytes
+    else:
+        ticket_rec = Ticket(
+            booking_id=booking.booking_id,
+            file_path=rel_path,
+            pdf_data=pdf_bytes,
+        )
+        db.add(ticket_rec)
+    db.commit()
+
+    return pdf_bytes
+
+
+@router.get("/{booking_id}/pdf")
+def download_ticket_pdf(booking_id: int, db: Session = Depends(get_db)):
+    """Generate, save to DB and tickets folder, and return ticket PDF."""
+    from fastapi.responses import Response
+
+    booking = db.query(Booking).filter(Booking.booking_id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    pdf_bytes = generate_and_save_ticket(booking, db)
 
     filename = f"SkyBooker_BoardingPass_{booking.pnr}.pdf"
     return Response(

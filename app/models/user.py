@@ -23,3 +23,5 @@ class User(Base):
 
     # Relationships
     bookings = relationship("Booking", back_populates="user")
+    loyalty = relationship("LoyaltyAccount", back_populates="user", uselist=False)
+

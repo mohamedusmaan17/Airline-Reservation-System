@@ -325,10 +325,15 @@ class BookingWindow:
             status
     ):
 
+        tickets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tickets"))
+        os.makedirs(tickets_dir, exist_ok=True)
+
         filename = f"Ticket_{pnr}.pdf"
+        file_path = os.path.join(tickets_dir, filename)
+        rel_path = f"tickets/{filename}"
 
         c = canvas.Canvas(
-            filename,
+            file_path,
             pagesize=letter
         )
 
@@ -367,9 +372,34 @@ class BookingWindow:
         )
         c.save()
 
+        # Save to database tickets table
+        try:
+            with open(file_path, "rb") as pdf_file:
+                pdf_bytes = pdf_file.read()
+
+            conn = connect_db()
+            cursor = conn.cursor()
+            is_sqlite = not hasattr(conn, "is_connected") or type(conn).__module__.startswith("sqlite3")
+            ph = "?" if is_sqlite else "%s"
+
+            cursor.execute(f"SELECT booking_id FROM bookings WHERE pnr={ph}", (pnr,))
+            row = cursor.fetchone()
+            if row:
+                b_id = row[0] if not isinstance(row, dict) else row.get("booking_id")
+                cursor.execute(f"SELECT COUNT(*) FROM tickets WHERE booking_id={ph}", (b_id,))
+                exists = cursor.fetchone()[0] > 0
+                if exists:
+                    cursor.execute(f"UPDATE tickets SET file_path={ph}, pdf_data={ph} WHERE booking_id={ph}", (rel_path, pdf_bytes, b_id))
+                else:
+                    cursor.execute(f"INSERT INTO tickets (booking_id, file_path, pdf_data) VALUES ({ph}, {ph}, {ph})", (b_id, rel_path, pdf_bytes))
+                conn.commit()
+            conn.close()
+        except Exception as e:
+            print(f"Warning: Failed to save ticket to SQL DB: {e}")
+
         messagebox.showinfo(
             "Ticket Generated",
-            f"{filename} created successfully."
+            f"{filename} created successfully in tickets folder & SQL database."
         )
     def generate_qr(self, pnr):
 

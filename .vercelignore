@@ -1,0 +1,11 @@
+.git
+.pytest_cache
+.ruff_cache
+.vscode
+__pycache__
+*.pyc
+gui/
+tickets/
+reports/
+.pyrefly.toml
+pyrightconfig.json

@@ -276,7 +276,7 @@ class Dashboard:
             ax = fig.add_subplot(111)
             ax.set_facecolor("#F0F4F8")
 
-            wedges, texts, autotexts = ax.pie(
+            pie_res = ax.pie(
                 values,
                 labels=labels,
                 autopct="%1.1f%%",
@@ -286,10 +286,13 @@ class Dashboard:
                 wedgeprops={"edgecolor": "white", "linewidth": 2},
                 pctdistance=0.82,
             )
-            for at in autotexts:
-                at.set_fontsize(9)
-                at.set_color("white")
-                at.set_fontweight("bold")
+            if len(pie_res) == 3:
+                wedges, texts, autotexts = pie_res
+                for at in autotexts:
+                    at.set_fontsize(9)
+                    at.set_color("white")
+                    at.set_fontweight("bold")
+
 
             ax.set_title("Payment Status", fontsize=12, fontweight="bold", color="#1E3A5F", pad=10)
 

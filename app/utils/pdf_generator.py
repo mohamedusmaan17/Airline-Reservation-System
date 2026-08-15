@@ -4,7 +4,14 @@ import qrcode  # type: ignore[import-untyped]
 from reportlab.lib import colors  # type: ignore[import-untyped]
 from reportlab.lib.pagesizes import letter  # type: ignore[import-untyped]
 from reportlab.lib.units import inch  # type: ignore[import-untyped]
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle  # type: ignore[import-untyped]
+from reportlab.platypus import (  # type: ignore[import-untyped]
+    Image,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
 try:
     from reportlab.platypus import HRFlowable  # type: ignore[import-untyped]

@@ -45,3 +45,4 @@ class Booking(Base):
     seat = relationship("Seat")
     payment = relationship("Payment", back_populates="booking", uselist=False)
     boarding_pass = relationship("BoardingPass", back_populates="booking", uselist=False)
+    ticket = relationship("Ticket", back_populates="booking", uselist=False)

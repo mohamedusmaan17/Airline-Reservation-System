@@ -63,9 +63,13 @@ class TicketGenerator:
         else:
             b_id, first_name, last_name, flight_num, seat_num, b_date, b_status, passport_num, email_addr = row
 
+        tickets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tickets"))
+        os.makedirs(tickets_dir, exist_ok=True)
         file_name = f"Ticket_{booking_id}.pdf"
+        file_path = os.path.join(tickets_dir, file_name)
+        rel_path = f"tickets/{file_name}"
 
-        doc = SimpleDocTemplate(file_name)
+        doc = SimpleDocTemplate(file_path)
         styles = getSampleStyleSheet()
         story = []
 
@@ -106,7 +110,25 @@ class TicketGenerator:
 
         doc.build(story)
 
+        # Read binary PDF and store in SQL database
+        try:
+            with open(file_path, "rb") as pdf_file:
+                pdf_bytes = pdf_file.read()
+
+            save_conn = connect_db()
+            save_cursor = save_conn.cursor()
+            save_cursor.execute(f"SELECT COUNT(*) FROM tickets WHERE booking_id={placeholder}", (b_id,))
+            exists = save_cursor.fetchone()[0] > 0
+            if exists:
+                save_cursor.execute(f"UPDATE tickets SET file_path={placeholder}, pdf_data={placeholder} WHERE booking_id={placeholder}", (rel_path, pdf_bytes, b_id))
+            else:
+                save_cursor.execute(f"INSERT INTO tickets (booking_id, file_path, pdf_data) VALUES ({placeholder}, {placeholder}, {placeholder})", (b_id, rel_path, pdf_bytes))
+            save_conn.commit()
+            save_conn.close()
+        except Exception as e:
+            print(f"Warning: Failed to store ticket in database: {e}")
+
         messagebox.showinfo(
             "Success",
-            f"Ticket saved as {file_name}"
+            f"Ticket saved in tickets folder as {file_name} and SQL database."
         )

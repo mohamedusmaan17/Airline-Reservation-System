@@ -33,9 +33,13 @@ def create_tables():
         boarding_pass,
         booking,
         flight,
+        loyalty,
         passenger,
         payment,
+        review,
         seat,
+        ticket,
         user,
     )
+
     Base.metadata.create_all(bind=engine)
