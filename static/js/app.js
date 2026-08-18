@@ -1034,7 +1034,7 @@ function openPaymentGatewayModal() {
             <div id="pay-method-upi" class="qr-timer-box">
                 <p class="text-secondary" style="font-size:0.85rem;">Scan QR code with GPay / PhonePe / Paytm</p>
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=usmaanmohamed16-1@oksbi&pn=Mohamed Usmaan&cu=INR&am=${total}`)}" class="qr-code-img">
-                <div style="font-size:0.8rem; color:var(--warning); font-weight:700;">⏱ Expires in 04:59</div>
+                <div id="qr-timer-text" style="font-size:0.8rem; color:var(--warning); font-weight:700;">⏱ Expires in 05:00</div>
             </div>
 
             <div id="pay-method-card" style="display:none;" class="form-group">
@@ -1050,6 +1050,24 @@ function openPaymentGatewayModal() {
     `;
 
     modal.style.display = 'flex';
+
+    // Start 5 minute timer
+    if (window.qrTimerInterval) clearInterval(window.qrTimerInterval);
+    let timeLeft = 300; // 5 minutes in seconds
+    const timerEl = document.getElementById('qr-timer-text');
+    
+    window.qrTimerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const s = (timeLeft % 60).toString().padStart(2, '0');
+        if (timerEl) timerEl.innerText = \`⏱ Expires in \${m}:\${s}\`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(window.qrTimerInterval);
+            closeModal('payment-modal');
+            showToast('Payment session expired after 5 minutes.', 'warning');
+        }
+    }, 1000);
 }
 
 function switchPayTab(type, btnEl) {
