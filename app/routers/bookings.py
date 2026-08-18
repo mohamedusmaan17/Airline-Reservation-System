@@ -109,9 +109,18 @@ def create_booking(
 
     # Automatically generate ticket PDF, store in tickets folder & save to SQL DB
     try:
-        generate_and_save_ticket(booking, db)
+        pdf_bytes = generate_and_save_ticket(booking, db)
+        
+        # Send the email with the ticket PDF attached
+        from app.utils.email_service import send_ticket_email
+        send_ticket_email(
+            to_email=passenger.email,
+            passenger_name=f"{passenger.first_name} {passenger.last_name}",
+            pnr=booking.pnr or f"SK-{booking.booking_id}",
+            pdf_data=pdf_bytes
+        )
     except Exception as e:
-        print(f"Warning: Failed to pre-generate ticket PDF: {e}")
+        print(f"Warning: Failed to pre-generate ticket PDF or send email: {e}")
 
     return _build_booking_response(booking, db)
 

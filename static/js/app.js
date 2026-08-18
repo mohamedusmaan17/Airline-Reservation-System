@@ -1033,7 +1033,7 @@ function openPaymentGatewayModal() {
 
             <div id="pay-method-upi" class="qr-timer-box">
                 <p class="text-secondary" style="font-size:0.85rem;">Scan QR code with GPay / PhonePe / Paytm</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=skybooker@upi" class="qr-code-img">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=usmaanmohamed16-1@oksbi&pn=Mohamed Usmaan&cu=INR&am=${total}`)}" class="qr-code-img">
                 <div style="font-size:0.8rem; color:var(--warning); font-weight:700;">⏱ Expires in 04:59</div>
             </div>
 
