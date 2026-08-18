@@ -14,12 +14,17 @@ from app.utils.seed import seed_database
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI):
     """Create tables and seed data on application startup."""
-    create_tables()
-    db = SessionLocal()
     try:
-        seed_database(db)
-    finally:
-        db.close()
+        create_tables()
+        db = SessionLocal()
+        try:
+            seed_database(db)
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Lifespan startup error: {e}")
+        import traceback
+        traceback.print_exc()
     yield
 
 
