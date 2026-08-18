@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from fastapi.responses import PlainTextResponse
+import os
+import sys
 
-app = FastAPI()
+# Add root directory to python path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-@app.get("/{path:path}")
-def test_app(path: str = ""):
-    return PlainTextResponse("Minimal Test App Working!")
+from app.main import app
+
+# Export app for Vercel Serverless Functions
